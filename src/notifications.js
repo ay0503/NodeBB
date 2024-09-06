@@ -100,15 +100,7 @@ Notifications.getMultiple = async function (nids) {
 				notification.bodyLong = utils.stripHTMLTags(notification.bodyLong, ['img', 'p', 'a']);
 			}
 
-			notification.user = usersData[index];
-			if (notification.user && notification.from) {
-				notification.image = notification.user.picture || null;
-				if (notification.user.username === '[[global:guest]]') {
-					notification.bodyShort = notification.bodyShort.replace(/([\s\S]*?),[\s\S]*?,([\s\S]*?)/, '$1, [[global:guest]], $2');
-				}
-			} else if (notification.image === 'brand:logo' || !notification.image) {
-				notification.image = meta.config['brand:logo'] || `${nconf.get('relative_path')}/logo.png`;
-			}
+			setNotificationImage(notification, index, usersData);
 		}
 	});
 	return notifications;
@@ -181,6 +173,18 @@ Notifications.push = async function (notification, uids) {
 		});
 	}, 500);
 };
+
+function setNotificationImage(notification, index, usersData) {
+	notification.user = usersData[index];
+	if (notification.user && notification.from) {
+		notification.image = notification.user.picture || null;
+		if (notification.user.username === '[[global:guest]]') {
+			notification.bodyShort = notification.bodyShort.replace(/([\s\S]*?),[\s\S]*?,([\s\S]*?)/, '$1, [[global:guest]], $2');
+		}
+	} else if (notification.image === 'brand:logo' || !notification.image) {
+		notification.image = meta.config['brand:logo'] || `${nconf.get('relative_path')}/logo.png`;
+	}
+}
 
 async function pushToUids(uids, notification) {
 	async function sendNotification(uids) {
